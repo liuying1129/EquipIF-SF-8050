@@ -266,8 +266,6 @@ procedure TfrmMain.BitBtn3Click(Sender: TObject);
 VAR
   SpecNo:string;
   adotemp22:tadoquery;
-  ItemID:string;
-  sValue:string;
   ReceiveItemInfo:OleVariant;
   FInts:OleVariant;
 begin
@@ -283,16 +281,29 @@ begin
   adotemp22.Connection:=ADOConn_BS;
   adotemp22.Close;
   adotemp22.SQL.Clear;
-  adotemp22.SQL.Text:='select 标本号,项目名称,测试结果 from TB_TEST_RESULT where format$(测试日期,''YYYY-MM-DD'')='''+FormatDateTime('YYYY-MM-DD',DateTimePicker1.Date)+''' ';
+  adotemp22.SQL.Text:='select 标本号,项目名称,单位,测试结果 from TB_TEST_RESULT where format$(测试日期,''YYYY-MM-DD'')='''+FormatDateTime('YYYY-MM-DD',DateTimePicker1.Date)+''' ';
   adotemp22.Open;
   while not adotemp22.Eof do
   begin
     SpecNo:=adotemp22.fieldbyname('标本号').AsString;
-    ItemID:=adotemp22.fieldbyname('项目名称').AsString;
-    sValue:=adotemp22.fieldbyname('测试结果').AsString;
     
     ReceiveItemInfo:=VarArrayCreate([0,0],varVariant);
-    ReceiveItemInfo[0]:=VarArrayof([ItemID,sValue,'','']);
+    ReceiveItemInfo[0]:=VarArrayof(['','','','']);//初始化
+
+    if(adotemp22.fieldbyname('项目名称').AsString='PT')AND(adotemp22.fieldbyname('单位').AsString='s') then
+      ReceiveItemInfo[0]:=VarArrayof(['PT',adotemp22.fieldbyname('测试结果').AsString,'','']);
+
+    if(adotemp22.fieldbyname('项目名称').AsString='PT')AND(adotemp22.fieldbyname('单位').AsString='INR') then
+      ReceiveItemInfo[0]:=VarArrayof(['INR',adotemp22.fieldbyname('测试结果').AsString,'','']);
+
+    if adotemp22.fieldbyname('项目名称').AsString='TT' then
+      ReceiveItemInfo[0]:=VarArrayof(['TT',adotemp22.fieldbyname('测试结果').AsString,'','']);
+
+    if adotemp22.fieldbyname('项目名称').AsString='APTT' then
+      ReceiveItemInfo[0]:=VarArrayof(['APTT',adotemp22.fieldbyname('测试结果').AsString,'','']);
+
+    if(adotemp22.fieldbyname('项目名称').AsString='FIB')AND(adotemp22.fieldbyname('单位').AsString='g/L') then
+      ReceiveItemInfo[0]:=VarArrayof(['FIB',adotemp22.fieldbyname('测试结果').AsString,'','']);
 
     if bRegister then
     begin
