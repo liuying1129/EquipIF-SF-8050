@@ -385,12 +385,12 @@ procedure TfrmMain.ComPort1RxFlag(Sender: TObject);
 //如果EventChar=#4,设备端发送的字符串为#65#66#67#4#65#66#67#4(一次性发送,且有多个#4),则onRxFlag触发时rfm=#65#66#67#4#65#66#67#4
 VAR
   SpecNo:string;
-  i:integer;
+  i,j:integer;
   dlttype:string;
   sValue:string;
   FInts:OleVariant;
   ReceiveItemInfo:OleVariant;
-  ls5:tstrings;
+  ls5,ls6:tstrings;
   msgRFM:STRING;
   ifHaveNotFinishedPack:boolean;
 begin
@@ -408,10 +408,27 @@ begin
 
     if trim(msgRFM)='' then continue;
 
-    SpecNo:=GetSpecNo(msgRFM);
-    dlttype:=TRIM(COPY(msgRFM,5,7));
-    sValue:=TRIM(COPY(msgRFM,12,MaxInt));
-    sValue:=TRIM(StringReplace(sValue,'ml','',[rfReplaceAll,rfIgnoreCase]));//项目FDP,单位ug/ml,联机标识FDPug/
+    //SpecNo:=GetSpecNo(msgRFM);
+    //dlttype:=TRIM(COPY(msgRFM,5,7));
+    //sValue:=TRIM(COPY(msgRFM,12,MaxInt));
+    //sValue:=TRIM(StringReplace(sValue,'ml','',[rfReplaceAll,rfIgnoreCase]));//项目FDP,单位ug/ml,联机标识FDPug/
+
+    SpecNo:='';
+    dlttype:='';
+    sValue:='';
+    
+    //ExtractStrings不会将空字符串加入到StringList,正好利用该特性
+    ls6:=TStringList.Create;
+    ExtractStrings([#$20],[],Pchar(msgRFM),ls6);
+    for j := 0 to ls6.Count-1 do
+    begin
+      if j=0 then SpecNo:=rightstr('0000'+trim(ls6[j]),4);
+      if j=1 then dlttype:=trim(ls6[j]);
+      if j=2 then sValue:=TRIM(ls6[j]);//trim掉最后的#$0A
+    end;
+    ls6.Free;
+
+    if SpecNo='' then SpecNo:=formatdatetime('nnss',now);
 
     ReceiveItemInfo:=VarArrayCreate([0,1-1],varVariant);
     ReceiveItemInfo[0]:=VarArrayof([dlttype,sValue,'','']);
