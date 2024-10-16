@@ -47,7 +47,6 @@ type
     { Private declarations }
     procedure UpdateConfig;{配置文件生效}
     function MakeDBConn:boolean;
-    function GetSpecNo(const Value:string):string; //取得联机号
   public
     { Public declarations }
   end;
@@ -251,15 +250,6 @@ begin
   end;
 end;
 
-function TfrmMain.GetSpecNo(const Value:string):string; //取得联机号
-begin
-  result:=COPY(Value,1,4);
-  result:='0000'+trim(result);
-  result:=rightstr(result,4);
-
-  if result='' then result:=formatdatetime('nnss',now);
-end;
-
 function TfrmMain.MakeDBConn:boolean;
 var
   newconnstr,ss: string;
@@ -347,7 +337,7 @@ begin
   ls:=Tstringlist.Create;
   ls.LoadFromFile(OpenDialog1.FileName);
   rfm:=ls.Text;
-  ComPort1RxChar(nil,0);
+  ComPort1RxFlag(nil);
   ls.Free;
 end;
 
@@ -408,11 +398,6 @@ begin
 
     if trim(msgRFM)='' then continue;
 
-    //SpecNo:=GetSpecNo(msgRFM);
-    //dlttype:=TRIM(COPY(msgRFM,5,7));
-    //sValue:=TRIM(COPY(msgRFM,12,MaxInt));
-    //sValue:=TRIM(StringReplace(sValue,'ml','',[rfReplaceAll,rfIgnoreCase]));//项目FDP,单位ug/ml,联机标识FDPug/
-
     SpecNo:='';
     dlttype:='';
     sValue:='';
@@ -424,7 +409,7 @@ begin
     begin
       if j=0 then SpecNo:=rightstr('0000'+trim(ls6[j]),4);
       if j=1 then dlttype:=trim(ls6[j]);
-      if j=2 then sValue:=TRIM(ls6[j]);//trim掉最后的#$0A
+      if j=2 then sValue:=TRIM(ls6[j]);
     end;
     ls6.Free;
 
